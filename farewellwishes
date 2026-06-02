@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Farewell Flipbook for Arun</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=Permanent+Marker&family=DM+Sans:wght@400;500;700&family=Caveat:wght@500;700&family=Kalam:wght@300;400;700&family=Satisfy&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg-1: #0d1329;
+      --bg-2: #1e1a4d;
+      --paper: #fffdf7;
+      --ink: #1d1a31;
+      --muted: #6d6784;
+      --pink: #ff6f91;
+      --orange: #ff9f43;
+      --teal: #18c9b8;
+      --blue: #4a8cff;
+      --lav: #a879ff;
+    }
+
+    body {
+      min-height: 100vh;
+      font-family: 'DM Sans', sans-serif;
+      background:
+        radial-gradient(circle at 15% 20%, rgba(74,140,255,.2) 0%, transparent 30%),
+        radial-gradient(circle at 80% 10%, rgba(168,121,255,.2) 0%, transparent 25%),
+        radial-gradient(circle at 70% 85%, rgba(24,201,184,.18) 0%, transparent 35%),
+        linear-gradient(140deg, var(--bg-1), var(--bg-2));
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 22px 14px 40px;
+      overflow-x: hidden;
+    }
+
+    #ambient {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .book-wrap {
+      width: min(860px, 97vw);
+      perspective: 1800px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .page {
+      display: none;
+      min-height: 600px;
+      border-radius: 10px 26px 26px 10px;
+      background: var(--paper);
+      overflow: hidden;
+      position: relative;
+      box-shadow:
+        0 0 0 1px rgba(255,255,255,.06),
+        12px 20px 80px rgba(0,0,0,.45),
+        inset -1px 0 0 #e8ddc8;
+      transform-origin: left center;
+    }
+
+    .page.active { display: block; }
+
+    .page.enter-next {
+      animation: flipNext .52s cubic-bezier(.22,.8,.24,1);
+    }
+
+    .page.enter-prev {
+      animation: flipPrev .52s cubic-bezier(.22,.8,.24,1);
+    }
+
+    @keyframes flipNext {
+      from { opacity: 0; transform: rotateY(-18deg) translateX(22px); }
+      to   { opacity: 1; transform: rotateY(0deg) translateX(0); }
+    }
+
+    @keyframes flipPrev {
+      from { opacity: 0; transform: rotateY(18deg) translateX(-22px); }
+      to   { opacity: 1; transform: rotateY(0deg) translateX(0); }
+    }
+
+    .page::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 26px;
+      background: linear-gradient(to right, #d3c6ac 0%, #e8dcc4 45%, transparent 100%);
+      border-right: 1px solid #dccdb0;
+    }
+
+    .page-inner {
+      padding: 44px 42px 40px 58px;
+      min-height: 600px;
+      position: relative;
+    }
+
+    .page-num {
+      position: absolute;
+      right: 20px;
+      bottom: 12px;
+      font-size: .75rem;
+      letter-spacing: 1.2px;
+      color: #b2a88f;
+      font-family: 'Permanent Marker', cursive;
+    }
+
+    .cover {
+      color: #fff;
+      text-align: center;
+      height: 100%;
+      display: grid;
+      place-items: center;
+      background:
+        linear-gradient(155deg, rgba(255,255,255,.04), rgba(255,255,255,.01)),
+        radial-gradient(circle at 20% 25%, rgba(255,111,145,.45) 0%, transparent 30%),
+        radial-gradient(circle at 78% 20%, rgba(168,121,255,.5) 0%, transparent 34%),
+        radial-gradient(circle at 62% 84%, rgba(24,201,184,.35) 0%, transparent 32%),
+        linear-gradient(130deg, #0e1734, #22205c 60%, #15163e);
+    }
+
+    .cover-card {
+      width: min(560px, 100%);
+      padding: 26px 22px 18px;
+      border-radius: 22px;
+      border: 1px solid rgba(255,255,255,.22);
+      background: rgba(255,255,255,.08);
+      backdrop-filter: blur(6px);
+      box-shadow: 0 20px 60px rgba(0,0,0,.28);
+    }
+
+    .wave {
+      font-size: 4rem;
+      display: inline-block;
+      animation: wave 2.4s ease-in-out infinite;
+      transform-origin: 70% 75%;
+    }
+
+    @keyframes wave {
+      0%,100% { transform: rotate(0deg) scale(1); }
+      35% { transform: rotate(16deg) scale(1.08); }
+      65% { transform: rotate(-8deg) scale(1.04); }
+    }
+
+    h1 {
+      margin-top: 10px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: clamp(2rem, 6vw, 3.7rem);
+      line-height: 1.06;
+      font-weight: 800;
+      letter-spacing: -1px;
+    }
+
+    h1 .lead-script {
+      font-family: 'Satisfy', cursive;
+      font-weight: 400;
+      letter-spacing: 0;
+      font-size: .85em;
+      opacity: .95;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .name {
+      display: block;
+      background: linear-gradient(100deg, #ff89a8, #ffd38a, #95ffe6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      margin-top: 12px;
+      font-family: 'Caveat', cursive;
+      font-size: 1.02rem;
+      letter-spacing: .2px;
+      opacity: .86;
+    }
+
+    .chip {
+      display: inline-block;
+      margin-top: 18px;
+      border: 1px solid rgba(255,255,255,.3);
+      border-radius: 999px;
+      padding: 6px 18px;
+      font-size: .8rem;
+      letter-spacing: 1px;
+      opacity: .92;
+    }
+
+    .spark-row {
+      margin-top: 16px;
+      font-size: 1.3rem;
+      letter-spacing: 10px;
+      opacity: .95;
+    }
+
+    .section-title {
+      text-align: center;
+      color: var(--ink);
+      margin-bottom: 18px;
+    }
+
+    .section-title h2 {
+      font-family: 'Kalam', cursive;
+      font-size: clamp(1.35rem, 4vw, 2rem);
+      font-weight: 700;
+      letter-spacing: .2px;
+    }
+
+    .section-title p {
+      margin-top: 6px;
+      color: var(--muted);
+      font-family: 'Caveat', cursive;
+      font-size: .95rem;
+    }
+
+    .masonry {
+      columns: 2;
+      column-gap: 14px;
+    }
+
+    .msg {
+      break-inside: avoid;
+      margin-bottom: 14px;
+      position: relative;
+      --msg-transform: none;
+      transform: var(--msg-transform);
+      transform-origin: center;
+      transition: transform .22s ease, box-shadow .22s ease, filter .22s ease;
+      opacity: 0;
+      animation: cardIn .5s ease forwards;
+    }
+
+    .msg:hover {
+      transform: var(--msg-transform) scale(1.07);
+      z-index: 5;
+      filter: saturate(1.03);
+      box-shadow: 0 16px 28px rgba(0,0,0,.22);
+    }
+
+    .msg:nth-child(1) { animation-delay: .03s; }
+    .msg:nth-child(2) { animation-delay: .07s; }
+    .msg:nth-child(3) { animation-delay: .11s; }
+    .msg:nth-child(4) { animation-delay: .15s; }
+    .msg:nth-child(5) { animation-delay: .19s; }
+    .msg:nth-child(6) { animation-delay: .23s; }
+
+    @keyframes cardIn {
+      from { opacity: 0; transform: translateY(8px) scale(.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .author-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: .82rem;
+      font-weight: 700;
+      color: #27223d;
+    }
+
+    .avatar {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      color: #fff;
+      display: grid;
+      place-items: center;
+      font-size: .72rem;
+      font-weight: 700;
+    }
+
+    .body {
+      line-height: 1.56;
+      font-size: .93rem;
+      font-family: 'Kalam', cursive;
+      color: #312b46;
+    }
+
+    .style-note {
+      border-radius: 4px;
+      padding: 16px 14px 14px;
+      background: #fff7d6;
+      box-shadow: 0 8px 16px rgba(0,0,0,.08);
+      --msg-transform: rotate(-1.2deg);
+      border-top: 6px solid #ffd464;
+    }
+
+    .style-note .body {
+      font-family: 'Caveat', cursive;
+      font-size: 1.05rem;
+    }
+
+    .style-note::after {
+      content: '';
+      position: absolute;
+      top: -7px;
+      right: 18px;
+      width: 52px;
+      height: 16px;
+      background: rgba(255,255,255,.55);
+      transform: rotate(3deg);
+      border-radius: 3px;
+    }
+
+    .style-chat {
+      border-radius: 18px;
+      padding: 14px 14px 14px;
+      background: linear-gradient(130deg, #f3fbff, #e9f2ff);
+      border: 1px solid #dce9ff;
+      box-shadow: 0 10px 20px rgba(40,84,146,.1);
+    }
+
+    .style-chat .body {
+      font-family: 'DM Sans', sans-serif;
+      font-size: .92rem;
+    }
+
+    .style-chat::before {
+      content: '';
+      position: absolute;
+      left: 18px;
+      bottom: -10px;
+      width: 16px;
+      height: 16px;
+      background: #e9f2ff;
+      transform: rotate(45deg);
+      border-right: 1px solid #dce9ff;
+      border-bottom: 1px solid #dce9ff;
+    }
+
+    .style-postcard {
+      border-radius: 14px;
+      padding: 14px;
+      background:
+        linear-gradient(90deg, #ff9f43 0 10px, transparent 10px),
+        repeating-linear-gradient(#fff, #fff 25px, #f4f1ff 26px, #f4f1ff 27px);
+      border: 1px solid #f4d0a8;
+      box-shadow: 0 8px 18px rgba(121,71,17,.12);
+    }
+
+    .style-postcard .body {
+      font-family: 'Kalam', cursive;
+    }
+
+    .style-neon {
+      border-radius: 16px;
+      padding: 14px;
+      background: #191633;
+      color: #eaf9ff;
+      border: 1px solid rgba(136,255,228,.35);
+      box-shadow: 0 0 0 1px rgba(255,255,255,.03), 0 0 22px rgba(24,201,184,.22);
+    }
+
+    .style-neon .author-row { color: #b7fff5; }
+    .style-neon .body {
+      color: #ddf8ff;
+      font-family: 'DM Sans', sans-serif;
+      letter-spacing: .1px;
+    }
+
+    .style-polaroid {
+      border-radius: 10px;
+      padding: 12px 12px 18px;
+      background: #fff;
+      border: 1px solid #ece8ff;
+      box-shadow: 0 14px 20px rgba(60,37,130,.14);
+    }
+
+    .style-polaroid .body {
+      font-family: 'Permanent Marker', cursive;
+      font-size: 1rem;
+      color: #3f3558;
+    }
+
+    .style-stamp .body {
+      font-family: 'Caveat', cursive;
+      font-size: 1.02rem;
+    }
+
+    .style-stamp {
+      border-radius: 14px;
+      padding: 12px;
+      background:
+        radial-gradient(circle at 0 0, transparent 8px, #fff6fa 9px) top left,
+        radial-gradient(circle at 100% 0, transparent 8px, #fff6fa 9px) top right,
+        radial-gradient(circle at 0 100%, transparent 8px, #fff6fa 9px) bottom left,
+        radial-gradient(circle at 100% 100%, transparent 8px, #fff6fa 9px) bottom right;
+      background-size: 51% 51%;
+      background-repeat: no-repeat;
+      border: 2px dashed #ff95be;
+      box-shadow: 0 10px 18px rgba(195,47,107,.12);
+    }
+
+    .style-stamp::after {
+      content: 'BEST WISHES';
+      position: absolute;
+      right: 10px;
+      top: 10px;
+      font-size: .56rem;
+      letter-spacing: 1px;
+      color: #c7377c;
+      border: 1px solid #ff95be;
+      border-radius: 999px;
+      padding: 2px 6px;
+    }
+
+    .style-ticket {
+      border-radius: 12px;
+      padding: 14px;
+      background: #f5fffa;
+      border: 1px solid #c6f1e8;
+      box-shadow: 0 8px 18px rgba(7,102,93,.1);
+      overflow: hidden;
+    }
+
+    .style-ticket::before,
+    .style-ticket::after {
+      content: '';
+      position: absolute;
+      top: 45%;
+      width: 16px;
+      height: 16px;
+      background: var(--paper);
+      border-radius: 50%;
+      border: 1px solid #c6f1e8;
+    }
+
+    .style-ticket::before { left: -9px; }
+    .style-ticket::after { right: -9px; }
+
+    .style-gradient {
+      border-radius: 16px;
+      padding: 14px;
+      background: linear-gradient(145deg, #f7f0ff, #edf8ff 52%, #f9fffa);
+      border: 1px solid #e7def8;
+      box-shadow: 0 12px 24px rgba(74,31,126,.1);
+    }
+
+    .style-gradient .body {
+      font-family: 'Kalam', cursive;
+    }
+
+    .m2 .msg { margin-bottom: 16px; }
+
+    .back {
+      display: grid;
+      place-items: center;
+      color: #fff;
+      text-align: center;
+      background:
+        linear-gradient(120deg, rgba(255,255,255,.04), rgba(255,255,255,.02)),
+        radial-gradient(circle at 20% 25%, rgba(255,111,145,.28) 0%, transparent 34%),
+        radial-gradient(circle at 80% 18%, rgba(168,121,255,.3) 0%, transparent 36%),
+        radial-gradient(circle at 50% 80%, rgba(24,201,184,.24) 0%, transparent 40%),
+        linear-gradient(135deg, #141338, #241b53 60%, #16183b);
+      overflow: hidden;
+    }
+
+    .back-card {
+      width: min(600px, 100%);
+      padding: 24px 22px;
+      border-radius: 24px;
+      border: 1px solid rgba(255,255,255,.23);
+      background: rgba(255,255,255,.08);
+      backdrop-filter: blur(7px);
+      box-shadow: 0 20px 70px rgba(0,0,0,.3);
+    }
+
+    .rocket {
+      font-size: 4rem;
+      display: inline-block;
+      animation: rocket 2.4s ease-in-out infinite;
+    }
+
+    @keyframes rocket {
+      0%,100% { transform: translateY(0) rotate(-10deg); }
+      50% { transform: translateY(-14px) rotate(-10deg); }
+    }
+
+    .back h2 {
+      margin-top: 10px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: clamp(1.6rem, 4.8vw, 2.6rem);
+      font-weight: 800;
+      line-height: 1.08;
+      background: linear-gradient(95deg, #ffc0db, #f7dba2, #9affef);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .back p {
+      margin-top: 12px;
+      color: #eff4ff;
+      opacity: .9;
+      line-height: 1.72;
+      font-size: .96rem;
+    }
+
+    .signature {
+      margin-top: 18px;
+      font-family: 'Satisfy', cursive;
+      font-size: 1.16rem;
+      color: #ffe7a3;
+    }
+
+    .emoji-line {
+      margin-top: 14px;
+      letter-spacing: 8px;
+      font-size: 1.35rem;
+    }
+
+    .nav {
+      margin-top: 18px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .nav button {
+      border: 1.5px solid rgba(255,255,255,.35);
+      background: rgba(255,255,255,.11);
+      color: #f2f5ff;
+      border-radius: 999px;
+      padding: 10px 24px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: .2s ease;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: .88rem;
+    }
+
+    .nav button:hover:not(:disabled) {
+      transform: translateY(-1px) scale(1.03);
+      background: rgba(255,255,255,.22);
+    }
+
+    .nav button:disabled {
+      opacity: .28;
+      cursor: not-allowed;
+    }
+
+    .dots {
+      display: flex;
+      gap: 7px;
+      align-items: center;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.35);
+      transition: .25s ease;
+      cursor: pointer;
+    }
+
+    .dot.on {
+      width: 22px;
+      border-radius: 8px;
+      background: #fff;
+    }
+
+    .float {
+      position: fixed;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 0;
+      animation: drift linear infinite;
+    }
+
+    @keyframes drift {
+      0% { transform: translateY(0) translateX(0) rotate(0deg); opacity: .5; }
+      50% { transform: translateY(-60px) translateX(16px) rotate(180deg); opacity: .9; }
+      100% { transform: translateY(-120vh) translateX(-12px) rotate(360deg); opacity: 0; }
+    }
+
+    @media (max-width: 760px) {
+      .page { min-height: 640px; }
+      .page-inner { min-height: 640px; padding: 38px 18px 34px 42px; }
+      .masonry { columns: 1; }
+      .cover-card, .back-card { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="ambient"></canvas>
+
+  <div class="book-wrap">
+    <section class="page active" id="p1">
+      <div class="page-inner cover">
+        <div class="cover-card">
+          <span class="wave">👋</span>
+          <h1>
+            <span class="lead-script">Farewell,</span>
+            <span class="name">Arun Sriraj</span>
+          </h1>
+          <p class="subtitle">A little flipbook of memories, laughs, and wishes.</p>
+          <span class="chip">June 2026</span>
+          <div class="spark-row">✨ 🎈 🌟 💫 🎉</div>
+        </div>
+      </div>
+      <span class="page-num">Cover</span>
+    </section>
+
+    <section class="page" id="p2">
+      <div class="page-inner">
+        <div class="masonry m1">
+          <article class="msg style-note">
+            <div class="author-row"><span class="avatar" data-color="#ff9f43">?</span><span class="author">Shruti</span></div>
+            <p class="body">When I had just joined, I got the opportunity to pair with Arun on my very first POF API development story. It was a great experience, and his planning really stood out. The way he breaks work into simple, manageable parts and carefully considers all possible scenarios even before development and testing begins is truly impressive. I also really admire his calm and composed nature. His thoughtful and clear mindset helps him think deeply and consistently deliver high-quality solutions. Arun's overall approach to planning and execution is something I truly appreciate and have learned from.</p>
+          </article>
+
+          <article class="msg style-chat">
+            <div class="author-row"><span class="avatar" data-color="#4a8cff">?</span><span class="author">Arun J</span></div>
+            <p class="body">You are a great teammate, and I have personally learned so many things from you. You have truly been an all-rounder in our team, and your place cannot be replaced by anyone. I wish you the very best in your future role. May God bless you with success, happiness, and prosperity in life. Please stay in touch.</p>
+          </article>
+
+          <article class="msg style-postcard">
+            <div class="author-row"><span class="avatar" data-color="#ff6f91">?</span><span class="author">Meghna</span></div>
+            <p class="body"><strong>Arun,</strong> It has been an absolute pleasure working with you. You are truly one of the most reliable and humble individuals I have had the opportunity to collaborate with. No matter the challenge, there was always a strong sense of confidence that things would get done seamlessly when you were leading it. Thank you for being such a constant source of motivation and positivity for the team. There is so much to learn from your approach, attitude, and dedication. While you will certainly be missed, I am excited for what lies ahead for you and wish you continued success in all your future endeavors. <strong>Do stay in touch! Wishing you all the very best.</strong></p>
+          </article>
+        </div>
+      </div>
+      <span class="page-num">Page 1 / Messages</span>
+    </section>
+
+    <section class="page" id="p3">
+      <div class="page-inner">
+        <div class="section-title">
+          <h2>More Notes from the Crew</h2>
+          <p>Different visual styles keep the page lively and fun.</p>
+        </div>
+
+        <div class="masonry m2">
+          <article class="msg style-ticket">
+            <div class="author-row"><span class="avatar" data-color="#18c9b8">?</span><span class="author">Divya</span></div>
+            <p class="body">It's hard to say goodbye! Thank you for being such a great teammate. I will miss our conversations and teamwork. It has been a pleasure working with you. I wish you success, happiness, and many achievements in your new journey. You will be missed. All the very best for the future, and please stay in touch! 🙂</p>
+          </article>
+
+          <article class="msg style-gradient">
+            <div class="author-row"><span class="avatar" data-color="#4a8cff">?</span><span class="author">Manoj</span></div>
+            <p class="body">It was truly a pleasure working with you, Arun! The many things you've handled will definitely be hard to catch up with. 😊 Your calm and composed approach to situations is especially commendable, and it's been great to see your consistency and dedication. Wishing you all the very best - please do keep in touch!</p>
+          </article>
+
+          <article class="msg style-neon">
+            <div class="author-row"><span class="avatar" data-color="#18c9b8">?</span><span class="author">Rajesh</span></div>
+            <p class="body">Arun, thank you for the outstanding work and ownership you have shown in the R1 TAT team over the last five years. Your contributions have had a meaningful impact on the team, and your reliability has always set a strong example. I truly appreciate your dedication and the consistency with which you delivered. Wishing you continued success, good health, and many achievements in your next role. Please stay in touch, and all the very best for the journey ahead.</p>
+          </article>
+
+          <article class="msg style-note">
+            <div class="author-row"><span class="avatar" data-color="#ff6f91">?</span><span class="author">Pavani</span></div>
+            <p class="body">All the best, Arun, for your future endeavors. Please stay in touch. Wishing you continued success, happiness, and many wonderful achievements in the journey ahead!</p>
+          </article>
+
+          <article class="msg style-postcard">
+            <div class="author-row"><span class="avatar" data-color="#ff9f43">?</span><span class="author">Vivek</span></div>
+            <p class="body">Your calm, composed approach to solving any issue is something I am trying to learn. I will miss you whenever I come to Pune 🙂. All the best, Arun, and we know you will do well wherever you go next. Good luck!!!</p>
+          </article>
+        </div>
+      </div>
+      <span class="page-num">Page 2 / Messages</span>
+    </section>
+
+    <section class="page" id="p4">
+      <div class="page-inner back">
+        <div class="back-card">
+          <span class="rocket">🚀</span>
+          <h2>Go Build Something Awesome</h2>
+          <p>
+            You leave behind a lot of respect, a lot of smiles, and a team that is genuinely grateful.
+            Thanks for everything, Arun. We cannot wait to hear about your next win.
+          </p>
+          <div class="signature">With love, your teammates</div>
+          <div class="signature">from John Deere Mfg ops R1 TAT team</div>
+          <div class="emoji-line">🎉 🌈 ✨ 🙌 💛</div>
+        </div>
+      </div>
+      <span class="page-num">Back Cover</span>
+    </section>
+  </div>
+
+  <div class="nav">
+    <button id="prev" disabled>Back</button>
+    <div class="dots" id="dots"></div>
+    <button id="next">Next</button>
+  </div>
+
+  <script>
+    const pages = Array.from(document.querySelectorAll('.page'));
+    const prevBtn = document.getElementById('prev');
+    const nextBtn = document.getElementById('next');
+    const dotsWrap = document.getElementById('dots');
+    let idx = 0;
+
+    pages.forEach((_, i) => {
+      const d = document.createElement('span');
+      d.className = 'dot' + (i === 0 ? ' on' : '');
+      d.addEventListener('click', () => go(i));
+      dotsWrap.appendChild(d);
+    });
+
+    function go(target) {
+      if (target === idx || target < 0 || target >= pages.length) return;
+      const dir = target > idx ? 'next' : 'prev';
+
+      pages[idx].classList.remove('active');
+      dotsWrap.children[idx].classList.remove('on');
+
+      idx = target;
+      pages[idx].classList.add('active');
+      pages[idx].classList.add(dir === 'next' ? 'enter-next' : 'enter-prev');
+      setTimeout(() => {
+        pages[idx].classList.remove('enter-next', 'enter-prev');
+      }, 550);
+
+      dotsWrap.children[idx].classList.add('on');
+      prevBtn.disabled = idx === 0;
+      nextBtn.disabled = idx === pages.length - 1;
+    }
+
+    prevBtn.addEventListener('click', () => go(idx - 1));
+    nextBtn.addEventListener('click', () => go(idx + 1));
+
+    document.querySelectorAll('.avatar').forEach((avatar) => {
+      const parent = avatar.parentElement;
+      const name = parent.querySelector('.author').textContent.trim();
+      const initials = name.split(' ').filter(Boolean).map((w) => w[0]).slice(0, 2).join('').toUpperCase();
+      avatar.textContent = initials || '?';
+      avatar.style.background = avatar.dataset.color || '#666';
+    });
+
+    (function ambientSky() {
+      const canvas = document.getElementById('ambient');
+      const ctx = canvas.getContext('2d');
+      let w = 0;
+      let h = 0;
+      let stars = [];
+
+      function resize() {
+        w = canvas.width = window.innerWidth;
+        h = canvas.height = window.innerHeight;
+        stars = Array.from({ length: 150 }, () => ({
+          x: Math.random() * w,
+          y: Math.random() * h,
+          r: Math.random() * 1.4 + 0.2,
+          o: Math.random() * 0.6 + 0.2,
+          d: Math.random() > 0.5 ? 1 : -1,
+          s: Math.random() * 0.004 + 0.001
+        }));
+      }
+
+      function draw() {
+        ctx.clearRect(0, 0, w, h);
+        stars.forEach((s) => {
+          s.o += s.s * s.d;
+          if (s.o > 0.9 || s.o < 0.15) s.d *= -1;
+          ctx.beginPath();
+          ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(255,255,255,${s.o})`;
+          ctx.fill();
+        });
+        requestAnimationFrame(draw);
+      }
+
+      window.addEventListener('resize', resize);
+      resize();
+      draw();
+    })();
+
+    (function floatingOrbs() {
+      const colors = ['#ff6f91', '#ff9f43', '#18c9b8', '#4a8cff', '#a879ff'];
+      for (let i = 0; i < 26; i++) {
+        const orb = document.createElement('div');
+        orb.className = 'float';
+        const size = 4 + Math.random() * 8;
+        orb.style.width = `${size}px`;
+        orb.style.height = `${size}px`;
+        orb.style.left = `${Math.random() * 100}%`;
+        orb.style.bottom = '-30px';
+        orb.style.background = colors[Math.floor(Math.random() * colors.length)];
+        orb.style.opacity = `${0.35 + Math.random() * 0.4}`;
+        orb.style.animationDuration = `${8 + Math.random() * 13}s`;
+        orb.style.animationDelay = `${Math.random() * -18}s`;
+        document.body.appendChild(orb);
+      }
+    })();
+  </script>
+</body>
+</html>
