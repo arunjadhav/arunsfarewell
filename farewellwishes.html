@@ -582,6 +582,14 @@
       animation: drift linear infinite;
     }
 
+    @media (hover: none) and (pointer: coarse) {
+      .msg:hover {
+        transform: var(--msg-transform);
+        filter: none;
+        box-shadow: 0 8px 18px rgba(0,0,0,.14);
+      }
+    }
+
     @keyframes drift {
       0% { transform: translateY(0) translateX(0) rotate(0deg); opacity: .5; }
       50% { transform: translateY(-60px) translateX(16px) rotate(180deg); opacity: .9; }
@@ -593,6 +601,18 @@
       .page-inner { min-height: 640px; padding: 38px 18px 34px 42px; }
       .masonry { columns: 1; }
       .cover-card, .back-card { width: 100%; }
+      .nav { gap: 10px; }
+      .nav button {
+        padding: 12px 20px;
+        font-size: .9rem;
+      }
+      .dot {
+        width: 12px;
+        height: 12px;
+      }
+      .dot.on {
+        width: 28px;
+      }
     }
   </style>
 </head>
@@ -705,6 +725,7 @@
   </div>
 
   <script>
+    const bookWrap = document.querySelector('.book-wrap');
     const pages = Array.from(document.querySelectorAll('.page'));
     const prevBtn = document.getElementById('prev');
     const nextBtn = document.getElementById('next');
@@ -739,6 +760,25 @@
 
     prevBtn.addEventListener('click', () => go(idx - 1));
     nextBtn.addEventListener('click', () => go(idx + 1));
+
+    let touchStartX = 0;
+    let touchStartY = 0;
+
+    bookWrap.addEventListener('touchstart', (e) => {
+      const t = e.changedTouches[0];
+      touchStartX = t.clientX;
+      touchStartY = t.clientY;
+    }, { passive: true });
+
+    bookWrap.addEventListener('touchend', (e) => {
+      const t = e.changedTouches[0];
+      const dx = t.clientX - touchStartX;
+      const dy = t.clientY - touchStartY;
+
+      if (Math.abs(dx) < 50 || Math.abs(dy) > 70) return;
+      if (dx < 0) go(idx + 1);
+      else go(idx - 1);
+    }, { passive: true });
 
     document.querySelectorAll('.avatar').forEach((avatar) => {
       const parent = avatar.parentElement;
